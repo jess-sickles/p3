@@ -81,6 +81,7 @@ def get_user_tweets(user):
 # Write an invocation to the function for the "umich" user timeline and 
 # save the result in a variable called umich_tweets:
 umich_tweets = get_user_tweets("@umich")
+print(umich_tweets)
 
 ## Task 2 - Creating database and loading data into database
 ## You should load into the Users table:
@@ -93,9 +94,9 @@ conn = sqlite3.connect('Users.sqlite')
 cursor = conn.cursor()
 cursor.execute('DROP TABLE IF EXISTS Users')
 cursor.execute('CREATE TABLE User (user_id TEXT, screen_name TEXT, num_favs NUMBER, descirption TEXT)')
-for tw in umsi_tweets:
-    tup = tw["id"], tw["user"]["screen_name"], tw["created_at"], tw ["text"], tw["retweet_count"]
-    cursor.execute("INSERT INTO Tweets (tweet_id, author, time_posted, tweet_text, retweets) VALUES (?,?,?,?,?)", tup)
+for tw in umich_tweets:
+    tup = tw["id"], tw["user"]["screen_name"], tw["favorite_count"], tw ["description"]
+    cursor.execute("INSERT INTO Tweets (user_id, screen_name, num_favs, description) VALUES (?,?,?,?)", tup)
 
 
 ## You should load into the Tweets table: 
