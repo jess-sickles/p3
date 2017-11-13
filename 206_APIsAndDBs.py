@@ -93,10 +93,11 @@ print(umich_tweets)
 conn = sqlite3.connect('Users.sqlite')
 cursor = conn.cursor()
 cursor.execute('DROP TABLE IF EXISTS Users')
-cursor.execute('CREATE TABLE User (user_id TEXT, screen_name TEXT, num_favs NUMBER, descirption TEXT)')
+cursor.execute('CREATE TABLE Users (user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, screen_name TEXT, num_favs NUMBER, description TEXT)')
 for tw in umich_tweets:
-    tup = tw["id"], tw["user"]["screen_name"], tw["favorite_count"], tw ["description"]
-    cursor.execute("INSERT INTO Tweets (user_id, screen_name, num_favs, description) VALUES (?,?,?,?)", tup)
+    tup = tw["user"]["screen_name"], tw["favorite_count"], tw["user"]["description"]
+    cursor.execute("INSERT INTO Users (user_id, screen_name, num_favs, description) VALUES (?,?,?,?)", tup)
+conn.commit()
 
 
 ## You should load into the Tweets table: 
