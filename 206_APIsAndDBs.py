@@ -67,7 +67,7 @@ def get_user_tweets(user):
 		return (s)
 	else:
 		print("Fetching")
-		s = api.user_timeline(screen_name = user)
+		s = api.user_timeline(screen_name = user, count = 20)
 		CACHE_DICTION[user] = s
 		print(CACHE_DICTION)
 		cache_file = open(CACHE_FNAME, 'w')
@@ -93,16 +93,18 @@ umich_tweets = get_user_tweets("@umich")
 # in the Users table, etc.
 conn = sqlite3.connect('206_APIsAndDBs.sqlite')
 cursor = conn.cursor()
-cursor.execute('DROP TABLE IF EXISTS Users')
-cursor.execute('CREATE TABLE Users (user_id TEXT PRIMARY KEY UNIQUE, screen_name TEXT, num_favs NUMBER, description TEXT)')
 
+#creating tweets table
 cursor.execute('DROP TABLE IF EXISTS Tweets')
 cursor.execute('CREATE TABLE Tweets (tweet_id TEXT PRIMARY KEY UNIQUE, text TEXT, user_posted TEXT, time_posted TIMESTAMP, retweets NUMBER)')
 
 for tw in umich_tweets:
 	tup = tw["id"], tw["text"], tw["id_str"], tw["created_at"], tw["retweet_count"]
 	cursor.execute('INSERT INTO Tweets (tweet_id, text, user_posted, time_posted, retweets) VALUES (?,?,?,?,?)', tup)
-
+#creating users table
+cursor.execute('DROP TABLE IF EXISTS Users')
+cursor.execute('CREATE TABLE Users (user_id TEXT PRIMARY KEY UNIQUE, screen_name TEXT, num_favs NUMBER, description TEXT)')
+#goes through tweets to make sure users are unique
 for t in umich_tweets:
 	cursor.execute('SELECT * FROM Users WHERE user_id = (?)', (t["user"]["id_str"],))
 	x = cursor.fetchall()
@@ -112,7 +114,7 @@ for t in umich_tweets:
 			cursor.execute('INSERT INTO Users(user_id, screen_name, num_favs, description) VALUES (?,?,?,?)',tup1)
 		except:
 			continue
-	if len(t["entities"]["user_mentions"]) >0:
+	if len(t["entities"]["user_mentions"]) >0:   #makes sure that if there is more than one mentioned user it is accounted for
 		tup2= t["id_str"], t["user"]["screen_name"], t["user"]["favourites_count"], t["user"]["description"]
 		try:
 			cursor.execute('INSERT INTO Users (user_id, screen_name, num_favs, description) VALUES (?,?,?,?)', tup2)
@@ -153,7 +155,7 @@ conn.commit()
 
 #users_info = True
 users_info = cursor.execute('SELECT * FROM Users')
-users_info = users_info.fetchall()
+users_info = users_info.fetchall() #creates a list of tuples
 
 
 # Make a query to select all of the user screen names from the database. 
@@ -162,7 +164,7 @@ users_info = users_info.fetchall()
 # this easier to complete! 
 
 screen_names=cursor.execute('SELECT screen_name FROM Users')
-screen_names = [''.join(n) for n in screen_names]
+screen_names = [''.join(n) for n in screen_names] #adds names to list
 
 # Make a query to select all of the tweets (full rows of tweet information)
 # that have been retweeted more than 10 times. Save the result 
@@ -181,7 +183,7 @@ favorites = [''.join(n) for n in favorites]
 # Make a query using an INNER JOIN to get a list of tuples with 2 
 # elements in each tuple: the user screenname and the text of the 
 # tweet. Save the resulting list of tuples in a variable called joined_data2.
-joined_data = cursor.execute('SELECT Users.screen_name, Tweets.text FROM Users JOIN Tweets')
+joined_data = cursor.execute('SELECT Users.screen_name, Tweets.text FROM Users INNER JOIN Tweets ON Users.user_id = Tweets.user_posted')
 joined_data = joined_data.fetchall()
 
 # Make a query using an INNER JOIN to get a list of tuples with 2 
@@ -189,7 +191,7 @@ joined_data = joined_data.fetchall()
 # tweet in descending order based on retweets. Save the resulting 
 # list of tuples in a variable called joined_data2.
 
-joined_data2 = cursor.execute('SELECT Users.screen_name, Tweets.text FROM Users JOIN Tweets ORDER BY Tweets.retweets DESC')
+joined_data2 = cursor.execute('SELECT Users.screen_name, Tweets.text FROM Users INNER JOIN Tweets ON Users.user_id = Tweets.user_posted ORDER BY Tweets.retweets DESC')
 joined_data2 = joined_data2.fetchall()
 
 
