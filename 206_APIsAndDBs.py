@@ -18,8 +18,8 @@ import twitter_info # same deal as always...
 import json
 import sqlite3
 
-## Your name:
-## The names of anyone you worked with on this project:
+## Your name: Jess Sickles
+## The names of anyone you worked with on this project: Jess Vu 
 
 #####
 
@@ -162,7 +162,7 @@ users_info = users_info.fetchall()
 # this easier to complete! 
 
 screen_names=cursor.execute('SELECT screen_name FROM Users')
-#screen_names = [''.join(n) for n in screen_names]
+screen_names = [''.join(n) for n in screen_names]
 
 # Make a query to select all of the tweets (full rows of tweet information)
 # that have been retweeted more than 10 times. Save the result 
@@ -174,9 +174,9 @@ retweets = retweets.fetchall()
 # the users who have favorited more than 500 tweets. Access all those 
 # strings, and save them in a variable called favorites, 
 # which should ultimately be a list of strings.
-favorites = True
-favorites = cursor.execute('SELECT descriptions FROM Users WHERE num_favs >500')
-favorites = 
+
+favorites = cursor.execute('SELECT description FROM Users WHERE num_favs >500')
+favorites = [''.join(n) for n in favorites]
 
 # Make a query using an INNER JOIN to get a list of tuples with 2 
 # elements in each tuple: the user screenname and the text of the 
@@ -189,7 +189,8 @@ joined_data = joined_data.fetchall()
 # tweet in descending order based on retweets. Save the resulting 
 # list of tuples in a variable called joined_data2.
 
-joined_data2 = True
+joined_data2 = cursor.execute('SELECT Users.screen_name, Tweets.text FROM Users JOIN Tweets ORDER BY Tweets.retweets DESC')
+joined_data2 = joined_data2.fetchall()
 
 
 ### IMPORTANT: MAKE SURE TO CLOSE YOUR DATABASE CONNECTION AT THE END 
